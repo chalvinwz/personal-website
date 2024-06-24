@@ -1,0 +1,169 @@
+---
+title: 'Provisioning With Pulumi'
+date: '2024-06-24'
+lastmod: '2024-06-24'
+tags: ['pulumi', 'cloud', 'kubernetes']
+draft: false
+summary: 'Demonstrates the deployment of a Kubernetes infrastructure on DigitalOcean using Pulumi. The setup includes creating a Virtual Private Cloud (VPC), provisioning droplets (virtual machines), setting up a firewall (security group), and configuring SSH keys'
+images: ['/static/images/twitter-card.png']
+authors: ['default']
+---
+
+# Deploying Kubernetes Infrastructure on DigitalOcean with Pulumi
+
+In this blog post, we'll walk through deploying a Kubernetes infrastructure on DigitalOcean using Pulumi. We'll create a Virtual Private Cloud (VPC), provision droplets, set up a firewall, and configure SSH keys. This guide assumes you have a basic understanding of Pulumi and DigitalOcean.
+
+## Prerequisites
+
+Before getting started, ensure you have the following:
+
+- Pulumi CLI installed
+- DigitalOcean account
+- SSH key added to your DigitalOcean account
+- Node.js and npm installed
+
+## Setting Up the Project
+
+1. **Initialize a new Pulumi project:**
+
+   ```bash
+   pulumi new typescript
+   ```
+
+2. **Install the necessary Pulumi package:**
+
+   ```bash
+   npm install @pulumi/pulumi @pulumi/digitalocean
+   ```
+
+3. **Create a `Pulumi.yaml` file:**
+
+   ```yaml
+   name: my-digitalocean-project
+   runtime: nodejs
+   description: A Pulumi project to deploy DigitalOcean resources
+   ```
+
+## Configuring Pulumi
+
+Configure Pulumi to use your DigitalOcean API token and SSH key fingerprint.
+
+```bash
+pulumi config set --secret digitalocean:token <your_digitalocean_api_token>
+pulumi config set --secret config:sshFingerprint <your_ssh_key_fingerprint>
+```
+
+## Writing the Code
+
+Create an `index.ts` file with the following content:
+
+```typescript:index.ts
+import * as pulumi from '@pulumi/pulumi'
+import * as digitalocean from '@pulumi/digitalocean'
+
+const config = new pulumi.Config('config')
+const sshKeyFingerprint = config.requireSecret('sshFingerprint')
+
+// Create a DigitalOcean VPC
+const vpc = new digitalocean.Vpc('k8s-vpc', {
+  name: 'k8s-vpc',
+  region: 'sgp1',
+  ipRange: '10.0.0.0/16',
+})
+
+// Create three Droplets
+const dropletNames = ['master', 'worker-01', 'worker-02']
+const droplets = dropletNames.map(
+  (name) =>
+    new digitalocean.Droplet(name, {
+      name: name,
+      region: vpc.region,
+      size: 's-2vcpu-2gb',
+      image: 'ubuntu-24-04-x64',
+      vpcUuid: vpc.id,
+      monitoring: true,
+      sshKeys: [sshKeyFingerprint],
+      tags: ['kubernetes', name === 'master' ? 'master' : 'worker'],
+    })
+)
+
+const portRanges = [
+  '22',
+  '80',
+  '443',
+  '6443',
+  '6783',
+  '8080',
+  '2379-2380',
+  '10248-10260',
+  '30000-32767',
+]
+
+const securityGroup = new digitalocean.Firewall('kubernetes-sg', {
+  name: 'kubernetes-sg',
+  inboundRules: [
+    ...portRanges.map((portRange) => ({
+      protocol: 'tcp',
+      portRange: portRange,
+      sourceAddresses: ['0.0.0.0/0', '::/0'],
+    })),
+    {
+      protocol: 'udp',
+      portRange: '6784',
+      sourceAddresses: ['0.0.0.0/0', '::/0'],
+    },
+    {
+      protocol: 'icmp',
+      sourceAddresses: ['0.0.0.0/0', '::/0'],
+    },
+  ],
+  outboundRules: [
+    {
+      protocol: 'tcp',
+      portRange: 'all',
+      destinationAddresses: ['0.0.0.0/0', '::/0'],
+    },
+  ],
+  dropletIds: pulumi
+    .all(droplets.map((droplet) => droplet.id))
+    .apply((ids) => ids.map((id) => parseInt(id))),
+})
+
+// Export the Droplet IPs
+export const dropletIps = droplets.map((droplet) => ({
+  name: droplet.name,
+  ip: droplet.ipv4Address,
+}))
+```
+
+## Deploying the Infrastructure
+
+Deploy the Pulumi stack to create the DigitalOcean resources:
+
+```bash
+pulumi up
+```
+
+Follow the prompts to confirm the deployment.
+
+## Accessing the Droplets
+
+Once deployed, you can access the droplets via SSH using their public IP addresses:
+
+```bash
+ssh username@droplet_public_ip
+```
+
+## Cleaning Up
+
+To destroy the created resources and delete the stack:
+
+```bash
+pulumi destroy
+```
+
+## Conclusion
+
+By following this guide, you have successfully set up a Kubernetes infrastructure on DigitalOcean using Pulumi. This setup includes creating a VPC, provisioning droplets, setting up a firewall, and exporting outputs to a YAML file. Pulumi's flexibility and powerful configuration management make it a great choice for managing cloud infrastructure as code.
+
+Feel free to customize the configurations and expand the setup to suit your needs. Happy deploying!
