@@ -1,0 +1,97 @@
+---
+title: 'Hands On Data Analysis with Python'
+date: '2024-06-24'
+lastmod: '2024-06-24'
+tags: ['python', 'data']
+draft: false
+summary: "Using Python's coolest tools: Pandas, NumPy, Matplotlib, and Seaborn. Get ready to slice, dice, visualize, and crunch numbers like a pro"
+---
+
+# Let's Crunch Some Data: Hands-On Examples with Python
+
+Alright, buckle up! We're diving into some real data action using Python's coolest tools: Pandas, NumPy, Matplotlib, and Seaborn. Get ready to slice, dice, visualize, and crunch numbers like a pro.
+
+#### Example 1: Pandas Power
+
+First up, let's load a dataset and unleash Pandas magic to explore and clean it up.
+
+```python
+import pandas as pd
+
+# Load dataset
+url = 'https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv'
+iris_data = pd.read_csv(url)
+
+# Check the first few rows
+print(iris_data.head())
+
+# Check summary statistics
+print(iris_data.describe())
+
+# Filter data
+setosa = iris_data[iris_data['species'] == 'setosa']
+
+# Group by species and calculate mean
+mean_by_species = iris_data.groupby('species').mean()
+
+print(mean_by_species)
+```
+
+#### Example 2: Visualize with Matplotlib and Seaborn
+
+Let's spice things up with some visual flair using Matplotlib and Seaborn.
+
+```python
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Plot a histogram of sepal lengths
+plt.figure(figsize=(8, 6))
+sns.histplot(data=iris_data, x='sepal_length', kde=True, bins=10, hue='species')
+plt.title('Distribution of Sepal Lengths by Species')
+plt.xlabel('Sepal Length (cm)')
+plt.ylabel('Count')
+plt.legend()
+plt.show()
+
+# Create a scatter plot of petal length vs. petal width
+plt.figure(figsize=(8, 6))
+sns.scatterplot(data=iris_data, x='petal_length', y='petal_width', hue='species', palette='Set1', s=100)
+plt.title('Petal Length vs. Petal Width')
+plt.xlabel('Petal Length (cm)')
+plt.ylabel('Petal Width (cm)')
+plt.legend()
+plt.show()
+```
+
+#### Example 3: NumPy Numerical Wizardry
+
+Now, let's crunch some numbers with NumPy.
+
+```python
+import numpy as np
+
+# Create a NumPy array
+data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+
+# Calculate mean, median, and standard deviation
+mean = np.mean(data)
+median = np.median(data)
+std_dev = np.std(data)
+
+print(f"Mean: {mean}")
+print(f"Median: {median}")
+print(f"Standard Deviation: {std_dev}")
+
+# Perform matrix multiplication
+matrix_a = np.array([[1, 2], [3, 4]])
+matrix_b = np.array([[2, 0], [1, 3]])
+
+result = np.dot(matrix_a, matrix_b)
+print("Matrix Multiplication Result:")
+print(result)
+```
+
+#### Wrapping Up
+
+There you have it! With Pandas, NumPy, Matplotlib, and Seaborn at your fingertips, you're equipped to handle data like a pro. Whether you're cleaning messy datasets, visualizing trends, or crunching numbers, Python's got your back. So dive in, experiment, and unleash your inner data wizard! Happy coding!
