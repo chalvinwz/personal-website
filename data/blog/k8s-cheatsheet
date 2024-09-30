@@ -1,0 +1,328 @@
+---
+title: 'Kubectl Cheatsheet'
+date: '2024-09-30'
+lastmod: '2024-09-30'
+tags: ['kubernetes', 'cloud']
+draft: false
+summary: 'Essential kubectl commands for interacting with and managing Kubernetes clusters.'
+---
+
+# The Ultimate Kubectl Cheat Sheet: Essential Commands for Managing Kubernetes
+
+Kubernetes (K8s) has become the go-to platform for container orchestration, helping teams deploy, manage, and scale applications across clusters. But to effectively interact with Kubernetes, you need to master `kubectl`, the command-line interface that allows you to communicate with your Kubernetes cluster.
+
+This cheat sheet will guide you through the most essential `kubectl` commands that every Kubernetes admin or developer should know.
+
+---
+
+## **Getting Started with Kubectl**
+
+### **Check Version**
+Before you begin, ensure you're running compatible versions of `kubectl` and Kubernetes.
+
+```bash
+kubectl version --client
+```
+
+### **Set Kubernetes Context**
+Switch between different clusters or namespaces.
+
+```bash
+kubectl config use-context <context-name>
+```
+
+### **View Current Context**
+Display the current Kubernetes context you are operating in.
+
+```bash
+kubectl config current-context
+```
+
+---
+
+## **Working with Pods**
+
+### **List Pods**
+View all pods in the default namespace:
+
+```bash
+kubectl get pods
+```
+
+To see pods in a specific namespace:
+
+```bash
+kubectl get pods -n <namespace>
+```
+
+### **Detailed Pod Information**
+Get detailed information about a specific pod:
+
+```bash
+kubectl describe pod <pod-name>
+```
+
+### **Create a Pod**
+You can quickly create a pod from a YAML configuration file:
+
+```bash
+kubectl apply -f <pod-definition.yaml>
+```
+
+### **Delete a Pod**
+Delete a pod by name:
+
+```bash
+kubectl delete pod <pod-name>
+```
+
+### **Get Pod Logs**
+Access the logs from a specific pod:
+
+```bash
+kubectl logs <pod-name>
+```
+
+For multi-container pods, specify the container name:
+
+```bash
+kubectl logs <pod-name> -c <container-name>
+```
+
+### **Execute Commands in a Running Pod**
+Execute a command inside a running pod:
+
+```bash
+kubectl exec -it <pod-name> -- /bin/bash
+```
+
+---
+
+## **Managing Deployments**
+
+### **List Deployments**
+List all deployments in the default namespace:
+
+```bash
+kubectl get deployments
+```
+
+### **Scale a Deployment**
+Scale a deployment by increasing or decreasing the number of replicas:
+
+```bash
+kubectl scale deployment <deployment-name> --replicas=<count>
+```
+
+### **Update a Deployment**
+Update a deployment to use a new Docker image:
+
+```bash
+kubectl set image deployment/<deployment-name> <container-name>=<new-image>
+```
+
+### **Roll Back a Deployment**
+If something goes wrong, you can roll back to a previous version:
+
+```bash
+kubectl rollout undo deployment/<deployment-name>
+```
+
+### **View Rollout Status**
+Check the status of a rollout:
+
+```bash
+kubectl rollout status deployment/<deployment-name>
+```
+
+---
+
+## **Interacting with Services**
+
+### **List Services**
+List all services in the default namespace:
+
+```bash
+kubectl get services
+```
+
+### **Expose a Deployment as a Service**
+Expose a deployment as a service to make it accessible:
+
+```bash
+kubectl expose deployment <deployment-name> --type=LoadBalancer --port=<port>
+```
+
+### **Delete a Service**
+Delete a service by name:
+
+```bash
+kubectl delete service <service-name>
+```
+
+---
+
+## **Working with ConfigMaps and Secrets**
+
+### **Create a ConfigMap**
+Create a ConfigMap from a file:
+
+```bash
+kubectl create configmap <configmap-name> --from-file=<path-to-file>
+```
+
+### **List ConfigMaps**
+List all ConfigMaps:
+
+```bash
+kubectl get configmaps
+```
+
+### **Create a Secret**
+Create a secret using a key-value pair:
+
+```bash
+kubectl create secret generic <secret-name> --from-literal=<key>=<value>
+```
+
+### **List Secrets**
+List all secrets:
+
+```bash
+kubectl get secrets
+```
+
+---
+
+## **Namespace Management**
+
+### **List Namespaces**
+List all available namespaces:
+
+```bash
+kubectl get namespaces
+```
+
+### **Create a Namespace**
+Create a new namespace:
+
+```bash
+kubectl create namespace <namespace-name>
+```
+
+### **Delete a Namespace**
+Delete a namespace:
+
+```bash
+kubectl delete namespace <namespace-name>
+```
+
+---
+
+## **Managing Nodes**
+
+### **List Nodes**
+List all the nodes in your Kubernetes cluster:
+
+```bash
+kubectl get nodes
+```
+
+### **View Node Details**
+Get detailed information about a specific node:
+
+```bash
+kubectl describe node <node-name>
+```
+
+### **Cordon a Node**
+Mark a node as unschedulable (no new pods will be scheduled on it):
+
+```bash
+kubectl cordon <node-name>
+```
+
+### **Uncordon a Node**
+Mark a node as schedulable again:
+
+```bash
+kubectl uncordon <node-name>
+```
+
+### **Drain a Node**
+Safely evict all pods from a node, preparing it for maintenance:
+
+```bash
+kubectl drain <node-name>
+```
+
+---
+
+## **Monitoring and Troubleshooting**
+
+### **View Cluster Events**
+Get a list of recent cluster events:
+
+```bash
+kubectl get events
+```
+
+### **Resource Usage**
+View the resource usage of pods (CPU, memory):
+
+```bash
+kubectl top pod
+```
+
+View resource usage of nodes:
+
+```bash
+kubectl top node
+```
+
+### **Get YAML Output for Resources**
+Get the full YAML manifest of a resource (e.g., pod, service, etc.):
+
+```bash
+kubectl get <resource-type> <resource-name> -o yaml
+```
+
+---
+
+## **Advanced Kubectl Tips**
+
+### **Dry Run for Commands**
+If you're unsure about a command, you can run it with `--dry-run` to simulate its execution without making any changes:
+
+```bash
+kubectl apply -f <file.yaml> --dry-run=client
+```
+
+### **Apply Changes with Force**
+In some situations, you may need to force apply changes:
+
+```bash
+kubectl apply -f <file.yaml> --force
+```
+
+### **Label Resources**
+Label resources to group them logically:
+
+```bash
+kubectl label pod <pod-name> <key>=<value>
+```
+
+### **Taint a Node**
+Taint a node to prevent pods from being scheduled on it, except by toleration:
+
+```bash
+kubectl taint nodes <node-name> key=value:NoSchedule
+```
+
+---
+
+## **Conclusion**
+
+This `kubectl` cheat sheet provides a quick and easy reference for managing your Kubernetes clusters. While these commands cover the most common scenarios, Kubernetes offers a vast array of features and tools for cluster management. As you become more familiar with Kubernetes, consider exploring more advanced features like Helm for package management, CRDs (Custom Resource Definitions), and building custom controllers to meet the specific needs of your infrastructure.
+
+Happy clustering!
